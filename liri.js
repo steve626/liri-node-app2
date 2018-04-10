@@ -4,10 +4,10 @@ var keys = require("./keys.js");
 var fs = require("fs");
 var request = require("request");
 var Twitter = require("twitter");
-var spotify = require("spotify");
+//var spotify = require("spotify");
 var Spotify = require("node-spotify-api");
 fs.writeFile("log.txt", process.argv, (error) => { /* handle error */ });
-var spotify = new Spotify(keys.Spotify);
+
 var client = new Twitter(keys.twitter);
 var nodeArgs = "";
 
@@ -17,15 +17,20 @@ var nodeArgs = process.argv;
 var value = "";
 
 for (var i = 3; i < nodeArgs.length; i++) {
+    if (i > 3 && i < nodeArgs.length) {
+          
+        value = value + " " + nodeArgs[i];
+    } else {
 
-    if (i > 3 && i < nodeArgs.length){
-        
-        value = value + "+" + nodeArgs[i];
+         value += nodeArgs[i];
 
-        console.log(nodeArgs);
-        console.log("argv: " + process.argv);
     };
 };
+
+        //console.log(nodeArgs);
+        console.log("value: " + value);
+        console.log("argv: " + process.argv);
+    
 
 //commands
 
@@ -53,6 +58,9 @@ function getTweets() {
                     count: 20};
 
     client.get("statuses/user_timeline", params, function(error, tweets, response) {
+
+        console.log(tweets);
+
         //shows tweets if there are no errors and if there is a response
         if (!error && response.statusCode === 200) {         
             console.log("last " + tweets.length + " tweets: " + tweets);
@@ -72,10 +80,12 @@ function getTweets() {
 //"spotify-this-song"
 
 function getSong(value) {
-    if (value == null) {
-        value = "v9SXd0LRQxOaczjL3hbiOQ";
-    }
-    spotify.search({type: "track", query: value }, function(err, data, response) {
+    // if (value == null) {
+    //     value = "beat it";    
+    // }
+    var spotify = new Spotify(keys.Spotify);
+    spotify.search({type: "track", query: value }, function(err, data) {
+        console.log("getSong: " + value);
         if (!err ) {
             spotBody = JSON.stringify(data);
             fs.appendFile("log.txt", spotBody + Date());
@@ -102,7 +112,7 @@ function getSong(value) {
 function getMovie(value) {
     if (value == null) {
         value = "shakes the clown";
-        console.log(value);
+        console.log("value2: " + value);
     }
     request("http://www.omdbapi.com/?t=" + value + "&tomatoes=true&y=&plot=short&apikey=4585ce0c", function(err, body){
                 if (!err ) {
@@ -146,4 +156,3 @@ function getRandom() {
             }
     });
 };
-

@@ -4,7 +4,6 @@ var keys = require("./keys.js");
 var fs = require("fs");
 var request = require("request");
 var Twitter = require("twitter");
-//var spotify = require("spotify");
 var Spotify = require("node-spotify-api");
 fs.writeFile("log.txt", process.argv, (error) => { /* handle error */ });
 
@@ -34,26 +33,28 @@ for (var i = 3; i < nodeArgs.length; i++) {
 
 //commands
 
+
+
 switch (action) {
     case "my-tweets":
-    getTweets();
+    getTweets(value);
     break;
 
     case "spotify-this-song":
-    getSong();
+    getSong(value);
     break;
 
     case "movie-this":
-    getMovie();
+    getMovie(value);
     break;
 
     case "do-what-it-says":
-    getRandom();
+    getRandom(value);
     break;
 };
 
 //"my-tweets" returns last 20 tweets
-function getTweets() {
+function getTweets(value) {
     var params = {screen_name: "steve626",
                     count: 20};
 
@@ -80,32 +81,33 @@ function getTweets() {
 //"spotify-this-song"
 
 function getSong(value) {
-    // if (value == null) {
-    //     value = "beat it";    
-    // }
+    if (value === null) {
+        value = "beat it";    
+    } else {
     var spotify = new Spotify(keys.Spotify);
     spotify.search({type: "track", query: value }, function(err, data) {
         console.log("getSong: " + value);
         if (!err ) {
+            console.log("spData: " + data);
             spotBody = JSON.stringify(data);
             fs.appendFile("log.txt", spotBody + Date());
-            console.log(data)
+            //console.log("spotBody: " + spotBody);
             console.log("\n~~~~~~~~~~~~~~~~~~~~~~\n");
-            console.log("Artist: " + spotBody.name);
-            console.log("Song: "  );//add song location
-            console.log("Album: " ) ; //add album location
-            console.log("Link: " ); //add link location
+            console.log("Artist: " + data.tracks.items[0].album.artists[0].name);
+            console.log("Song: "  + data.tracks.items[0].name);
+            console.log("Album: "+ data.tracks.items[0].external_urls.spotify);
+            console.log("Link: " + data.tracks.items[0].album.name);
             console.log("\n~~~~~~~~~~~~~~~~~~~~~~\n");
 
-        }  if (err) {
+        }  else if (err) {
             console.log("error retrieving song: " + err);
             fs.appendFile("log.txt", err + Date());
         } else {
             console.log("trouble retrieving songs, try again later");
             fs.appendFile("log.txt", "trouble retrieving songs" + Date());
-        }
-    });
-
+            }
+        });
+    };
 };
 
 //"movie-this"
@@ -118,6 +120,7 @@ function getMovie(value) {
                 if (!err ) {
                     movieBody = JSON.stringify(body);
                     fs.appendFile("log.txt", movieBody + Date());
+                    console.log("movieBody: " + movieBody);
                     console.log("\n~~~~~~~~~~~~~~~~~~~~~~\n");
                     console.log("Title: "+ movieBody.Title);
                     console.log("Year Released: " + movieBody.Year);
@@ -133,7 +136,7 @@ function getMovie(value) {
                 
                 }
 
-         if (err) {
+         else if (err) {
             console.log("error retrieving movie: \n" + err);
             fs.appendFile("log.txt", err + Date());
         } else {
@@ -145,7 +148,7 @@ function getMovie(value) {
 
 //"do-what-it-says"
 
-function getRandom() {
+function getRandom(value) {
     fs.readFile("random.txt", "utf8", function(error,data){
         if (error) {
             console.log(error);
